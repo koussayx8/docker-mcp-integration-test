@@ -63,7 +63,7 @@ def home():
                 <h2>Application Status</h2>
                 <div class="metric success">✅ Status: Running</div>
                 <div class="metric info">🕐 Current Time: {{ current_time }}</div>
-                <div class="metric info">⏱️ Uptime: {{ uptime:.2f }} seconds</div>
+                <div class="metric info">⏱️ Uptime: {{ "%.2f"|format(uptime) }} seconds</div>
                 <div class="metric info">📊 Total Requests: {{ request_count }}</div>
                 <div class="metric info">🌿 Branch: {{ branch_name }}</div>
                 <div class="metric info">🔧 Environment: {{ environment }}</div>

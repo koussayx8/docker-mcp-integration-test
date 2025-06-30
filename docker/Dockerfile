@@ -17,25 +17,26 @@ FROM python:3.11-slim
 WORKDIR /app
 
 # Copy installed packages from builder stage
-COPY --from=builder /root/.local /root/.local
+COPY --from=builder /root/.local /home/appuser/.local
 
 # Copy application code
 COPY src/ .
 
 # Create non-root user for security
 RUN useradd --create-home --shell /bin/bash appuser && \
-    chown -R appuser:appuser /app
+    chown -R appuser:appuser /app && \
+    chown -R appuser:appuser /home/appuser/.local
 USER appuser
 
 # Make sure scripts in .local are usable
-ENV PATH=/root/.local/bin:$PATH
+ENV PATH=/home/appuser/.local/bin:$PATH
 
 # Expose port
 EXPOSE 8000
 
-# Health check
+# Health check using Python instead of curl
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:8000/health || exit 1
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/health').read()" || exit 1
 
 # Run the application
 CMD ["python", "app.py"]
