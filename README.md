@@ -1,14 +1,24 @@
-# Advanced GitHub MCP & Docker MCP Integration
+# Advanced GitHub MCP & Docker CI/CD Integration
 
-This project demonstrates advanced integration between GitHub MCP and Docker MCP in VS Code, featuring:
+This project demonstrates a production-ready CI/CD pipeline integrating GitHub MCP and Docker with comprehensive automation, featuring:
 
-## Features
+## ✅ Current Status (June 30, 2025)
 
-- **Automated Docker Build**: Build Docker images from the current Git branch
-- **Container Deployment & Testing**: Deploy and test containers automatically
-- **GitHub Pull Request Creation**: Automatically create PRs when tests pass
-- **Container Performance Monitoring**: Monitor running containers
-- **Integrated MCP Workflow**: Seamless GitHub and Docker operations via Copilot Chat
+**Pipeline Status**: 🟢 **FULLY OPERATIONAL**
+- All container name issues resolved
+- Robust error handling implemented
+- GitHub Container Registry publishing working
+- Complete end-to-end automation functional
+
+## Core Features
+
+- **✅ Automated Docker Build**: Build Docker images from the current Git branch with health checks
+- **✅ Container Deployment & Testing**: Deploy and test containers with comprehensive validation
+- **✅ GitHub Actions CI/CD**: Complete pipeline with build, test, deploy stages
+- **✅ GitHub Container Registry**: Automatic image publishing to ghcr.io
+- **✅ Container Performance Monitoring**: Monitor running containers with detailed logs
+- **✅ Integrated MCP Workflow**: Seamless GitHub and Docker operations via Copilot Chat
+- **✅ VS Code Tasks Integration**: One-click automation for all operations
 
 ## Prerequisites
 
@@ -23,32 +33,49 @@ This project demonstrates advanced integration between GitHub MCP and Docker MCP
 ```
 Testing Mcp/
 ├── .github/
-│   └── copilot-instructions.md    # Copilot instructions
+│   ├── workflows/
+│   │   ├── ci-cd.yml             # Main CI/CD pipeline
+│   │   └── ci-cd-fixed.yml       # Fixed version reference
+│   └── copilot-instructions.md   # Copilot instructions
 ├── .vscode/
-│   └── tasks.json                 # VS Code tasks
+│   └── tasks.json                # VS Code tasks for automation
 ├── docker/
-│   ├── Dockerfile                 # Docker image definition
-│   ├── docker-compose.yml         # Multi-container setup
-│   └── nginx.conf                 # Nginx configuration
+│   ├── Dockerfile                # Optimized multi-stage build
+│   ├── docker-compose.yml        # Multi-container setup
+│   ├── nginx.conf                # Nginx configuration
+│   └── prometheus.yml            # Monitoring configuration
 ├── src/
-│   ├── app.py                     # Sample Python application
-│   └── requirements.txt           # Python dependencies
+│   ├── app.py                    # Flask application with health endpoints
+│   └── requirements.txt          # Python dependencies
 ├── scripts/
-│   ├── build.ps1                  # Build automation script
-│   ├── deploy.ps1                 # Deployment script
-│   ├── test.ps1                   # Testing script
-│   └── monitor.ps1                # Monitoring script
+│   ├── build.ps1                 # Build automation script
+│   ├── deploy.ps1                # Deployment script
+│   ├── test.ps1                  # Testing script
+│   └── monitor.ps1               # Monitoring script
 ├── tests/
-│   └── test_app.py                # Application tests
-└── README.md                      # This file
+│   └── test_app.py               # Comprehensive test suite
+├── PIPELINE_COMPLETE.md          # Complete pipeline documentation
+└── README.md                     # This file
 ```
 
 ## Quick Start
 
-1. **Open in VS Code**: Open this folder in VS Code
-2. **Test MCP Integration**: Use Copilot Chat to test GitHub and Docker MCP
-3. **Run Build Task**: Execute the build task from VS Code Command Palette
-4. **Monitor Workflow**: Watch the automated process in action
+1. **Clone and Open**: Clone this repository and open in VS Code
+2. **Verify Docker**: Ensure Docker Desktop is running
+3. **Test Pipeline**: Push to master branch to trigger full CI/CD
+4. **Monitor Results**: Check GitHub Actions and Container Registry
+5. **Local Development**: Use VS Code tasks for local testing
+
+### 🚀 One-Click Operations
+
+**Complete Pipeline**:
+- `Ctrl+Shift+P` → "Tasks: Run Task" → "Complete Build-Test-Deploy Pipeline"
+
+**Individual Operations**:
+- Build: "Build Docker Image"
+- Deploy: "Deploy Container" 
+- Test: "Run Tests"
+- Monitor: "Monitor Container"
 
 ## Usage
 
@@ -95,32 +122,48 @@ Ensure your VS Code `settings.json` includes:
 }
 ```
 
-## Workflow Overview
+## Pipeline Status & Endpoints
 
-1. **Branch Detection**: Automatically detect current Git branch
-2. **Docker Build**: Build image tagged with branch name
-3. **Container Deploy**: Start container with health checks
-4. **Automated Testing**: Run test suite against deployed container
-5. **Performance Monitoring**: Collect container metrics
-6. **GitHub Integration**: Create PR if all tests pass
-7. **Cleanup**: Stop and remove test containers
+### 🔗 GitHub Repository
+- **Repository**: [koussayx8/docker-mcp-integration-test](https://github.com/koussayx8/docker-mcp-integration-test)
+- **Actions**: [CI/CD Workflow Runs](https://github.com/koussayx8/docker-mcp-integration-test/actions)
+- **Registry**: [GitHub Container Registry](https://github.com/koussayx8/docker-mcp-integration-test/pkgs/container/mcp-integration-test)
+
+### 🐳 Container Endpoints
+- `http://localhost:8000/` - Application home
+- `http://localhost:8000/health` - Health check endpoint
+- `http://localhost:8000/api/info` - Application information
+- `http://localhost:8000/api/test` - Test endpoint
+- `http://localhost:8000/metrics` - Prometheus metrics
+
+### 📊 Recent Improvements
+- **Container naming consistency** using environment variables
+- **Enhanced error handling** with detailed exception reporting
+- **Improved container logs** with conditional collection
+- **Robust cleanup procedures** for reliable testing
+- **Simplified configuration** for maximum stability
 
 ## Troubleshooting
 
-### Docker MCP Issues
+### ✅ Pipeline Issues (Recently Fixed)
+- **Container name errors**: ✅ Resolved with CONTAINER_NAME env variable
+- **Health check failures**: ✅ Enhanced with better error handling
+- **Log collection errors**: ✅ Added conditional log checks
+
+### Docker Issues
 - Ensure Docker Desktop is running
-- Verify Docker MCP plugin is installed
-- Check VS Code settings.json configuration
+- Verify sufficient disk space for images
+- Check port 8000 is not in use
 
-### GitHub MCP Issues
-- Verify GitHub token permissions
-- Check network connectivity
-- Ensure repository access rights
+### GitHub Actions Issues
+- Check workflow status in Actions tab
+- Verify repository permissions
+- Review workflow logs for details
 
-### General Issues
-- Restart VS Code if MCP servers are unresponsive
-- Check VS Code Developer Console for error messages
-- Verify all prerequisites are installed
+### VS Code Integration
+- Restart VS Code if tasks are unresponsive
+- Check task definitions in .vscode/tasks.json
+- Verify PowerShell execution policy on Windows
 
 ## Contributing
 
