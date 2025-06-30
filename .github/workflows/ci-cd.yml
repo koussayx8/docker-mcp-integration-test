@@ -59,12 +59,15 @@ jobs:
     
     - name: Start container for testing
       run: |
+        # Get the first tag from the metadata output
+        IMAGE_TAG=$(echo '${{ steps.meta.outputs.tags }}' | head -n1)
+        echo "Using image tag: $IMAGE_TAG"
         docker run -d \
           --name test-container \
           -p 8000:8000 \
           -e APP_ENV=testing \
           -e BRANCH_NAME=${{ github.ref_name }} \
-          ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
+          $IMAGE_TAG
     
     - name: Wait for container health check
       run: |
