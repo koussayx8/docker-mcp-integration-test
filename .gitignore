@@ -1,0 +1,10 @@
+﻿build-info.json
+test-report.json
+container-metrics-*.json
+monitoring-summary-*.json
+*.log
+logs/
+__pycache__/
+*.py[cod]
+*.tmp
+*.temp
