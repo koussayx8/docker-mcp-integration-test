@@ -56,15 +56,35 @@ jobs:
     
     - name: Run health check tests
       run: |
+        # Test health endpoint using Python
+        python3 -c "
+        import urllib.request
+        import json
+        
         # Test health endpoint
-        curl -f http://localhost:8000/health
+        response = urllib.request.urlopen('http://localhost:8000/health')
+        data = json.loads(response.read().decode())
+        assert data['status'] == 'healthy'
+        print('✅ Health check passed')
         
-        # Test API endpoints
-        curl -f http://localhost:8000/api/info
-        curl -f http://localhost:8000/api/test
+        # Test API info endpoint
+        response = urllib.request.urlopen('http://localhost:8000/api/info')
+        data = json.loads(response.read().decode())
+        assert 'app_name' in data
+        print('✅ API info check passed')
         
-        # Test metrics endpoint
-        curl -f http://localhost:8000/metrics
+        # Test API test endpoint
+        response = urllib.request.urlopen('http://localhost:8000/api/test')
+        data = json.loads(response.read().decode())
+        assert data['test'] == 'success'
+        print('✅ API test check passed')
+        
+        # Test metrics endpoint (just check it responds)
+        response = urllib.request.urlopen('http://localhost:8000/metrics')
+        metrics_data = response.read().decode()
+        assert 'python_info' in metrics_data
+        print('✅ Metrics check passed')
+        "
     
     - name: Set up Python for testing
       uses: actions/setup-python@v4
@@ -105,12 +125,28 @@ jobs:
     
     - name: Run load test
       run: |
-        # Simple load test
-        echo "Running load test..."
-        for i in {1..50}; do
-          curl -s http://localhost:8000/api/test > /dev/null
-        done
-        echo "Load test completed"
+        # Simple load test using Python
+        python3 -c "
+        import urllib.request
+        import time
+        
+        print('Running load test...')
+        success_count = 0
+        
+        for i in range(50):
+            try:
+                response = urllib.request.urlopen('http://localhost:8000/api/test')
+                if response.getcode() == 200:
+                    success_count += 1
+            except Exception as e:
+                print(f'Request {i+1} failed: {e}')
+            
+            if i % 10 == 9:
+                print(f'Completed {i+1}/50 requests')
+        
+        print(f'Load test completed: {success_count}/50 requests successful')
+        assert success_count >= 45, f'Too many failures: {50-success_count}'
+        "
     
     - name: Collect container logs
       if: always()
