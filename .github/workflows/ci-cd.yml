@@ -39,7 +39,6 @@ jobs:
         tags: |
           type=ref,event=branch
           type=ref,event=pr
-          type=sha,prefix={{branch}}-
           type=raw,value=latest,enable={{is_default_branch}}
     
     - name: Build Docker image
@@ -47,15 +46,13 @@ jobs:
       with:
         context: .
         file: ./docker/Dockerfile
+        load: true
         push: false
         tags: local-test:latest
-        labels: ${{ steps.meta.outputs.labels }}
         build-args: |
           BRANCH_NAME=${{ github.ref_name }}
           BUILD_NUMBER=${{ github.run_number }}
           COMMIT_HASH=${{ github.sha }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
     
     - name: Start container for testing
       run: |
