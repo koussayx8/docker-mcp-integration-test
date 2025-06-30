@@ -14,12 +14,23 @@ This project demonstrates a complete DevOps automation pipeline integrating:
 
 ```
 ┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│   Local Dev     │    │   GitHub Actions │    │   Registries    │
-│                 │    │                  │    │                 │
-│ VS Code Tasks   │───▶│  Build Pipeline  │───▶│ GHCR + DockerHub│
-│ PowerShell      │    │  Test Suite      │    │                 │
-│ Docker Compose  │    │  Health Checks   │    │ Image Storage   │
+│   Local Dev     │    │   GitHub Actions │    │   Production    │
+│                 │    │   CI/CD Pipeline │    │                 │
+│ ✅ VS Code Tasks│───▶│ ✅ Build & Test  │───▶│ ✅ GHCR Registry│
+│ ✅ PowerShell   │    │ ✅ Health Checks │    │ ⏳ Docker Hub   │
+│ ✅ Docker Local │    │ ✅ Auto Deploy  │    │ ✅ Monitoring   │
 └─────────────────┘    └──────────────────┘    └─────────────────┘
+         │                        │                        │
+         │              ┌──────────────────┐               │
+         └──────────────│   GitHub MCP     │───────────────┘
+                        │   Integration    │
+                        │ ✅ Repo Mgmt     │
+                        │ ✅ Issue/PR Auto │ 
+                        │ ✅ Commit Track  │
+                        └──────────────────┘
+
+Flow: Code → Build → Test → Deploy → Monitor
+Status: 🟢 Fully Operational Pipeline
 ```
 
 ## 📋 Features Completed
