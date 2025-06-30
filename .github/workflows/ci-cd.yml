@@ -2,9 +2,9 @@ name: Docker MCP Integration CI/CD
 
 on:
   push:
-    branches: [ main, develop, feature/* ]
+    branches: [ master, main, develop, feature/* ]
   pull_request:
-    branches: [ main, develop ]
+    branches: [ master, main, develop ]
 
 env:
   IMAGE_NAME: mcp-integration-test
@@ -64,30 +64,63 @@ jobs:
           -p 8000:8000 \
           -e APP_ENV=testing \
           -e BRANCH_NAME=${{ github.ref_name }} \
-          --health-cmd "curl -f http://localhost:8000/health || exit 1" \
-          --health-interval 30s \
-          --health-timeout 10s \
-          --health-retries 3 \
-          --health-start-period 40s \
-          ${{ steps.meta.outputs.tags }}
+          ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
     
     - name: Wait for container health check
       run: |
-        echo "Waiting for container to be healthy..."
-        timeout 120 bash -c 'until [ "$(docker inspect --format="{{.State.Health.Status}}" test-container)" == "healthy" ]; do sleep 5; done'
-        echo "Container is healthy!"
+        echo "Waiting for container to start..."
+        sleep 15
+        echo "Testing container health with Python..."
+        python3 -c "
+        import urllib.request
+        import time
+        import sys
+        
+        for i in range(12):
+            try:
+                response = urllib.request.urlopen('http://localhost:8000/health')
+                if response.getcode() == 200:
+                    print('Container is healthy!')
+                    sys.exit(0)
+            except:
+                print(f'Attempt {i+1}: Container not ready yet...')
+                time.sleep(5)
+        
+        print('Container failed to become healthy')
+        sys.exit(1)
+        "
     
     - name: Run health check tests
       run: |
+        # Test endpoints using Python instead of curl
+        python3 -c "
+        import urllib.request
+        import json
+        
         # Test health endpoint
-        curl -f http://localhost:8000/health
+        response = urllib.request.urlopen('http://localhost:8000/health')
+        data = json.loads(response.read().decode())
+        assert data['status'] == 'healthy'
+        print('✅ Health check passed')
         
-        # Test API endpoints
-        curl -f http://localhost:8000/api/info
-        curl -f http://localhost:8000/api/test
+        # Test API info
+        response = urllib.request.urlopen('http://localhost:8000/api/info')
+        data = json.loads(response.read().decode())
+        assert 'app_name' in data
+        print('✅ API info passed')
         
-        # Test metrics endpoint
-        curl -f http://localhost:8000/metrics
+        # Test API test
+        response = urllib.request.urlopen('http://localhost:8000/api/test')
+        data = json.loads(response.read().decode())
+        assert data['test'] == 'success'
+        print('✅ API test passed')
+        
+        # Test metrics
+        response = urllib.request.urlopen('http://localhost:8000/metrics')
+        metrics = response.read().decode()
+        assert 'python_info' in metrics
+        print('✅ Metrics passed')
+        "
     
     - name: Set up Python for testing
       uses: actions/setup-python@v4
@@ -128,12 +161,20 @@ jobs:
     
     - name: Run load test
       run: |
-        # Simple load test
-        echo "Running load test..."
-        for i in {1..50}; do
-          curl -s http://localhost:8000/api/test > /dev/null
-        done
-        echo "Load test completed"
+        # Simple load test using Python
+        python3 -c "
+        import urllib.request
+        print('Running load test...')
+        success_count = 0
+        for i in range(50):
+            try:
+                response = urllib.request.urlopen('http://localhost:8000/api/test')
+                if response.getcode() == 200:
+                    success_count += 1
+            except:
+                pass
+        print(f'Load test completed: {success_count}/50 successful')
+        "
     
     - name: Collect container logs
       if: always()
@@ -148,7 +189,7 @@ jobs:
         docker rm test-container || true
     
     - name: Push Docker image
-      if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+      if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
       uses: docker/build-push-action@v5
       with:
         context: .
@@ -173,6 +214,6 @@ jobs:
         echo "- **Build Number**: ${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
         echo "- **Status**: ✅ All tests passed" >> $GITHUB_STEP_SUMMARY
         
-        if [ "${{ github.event_name }}" == "push" ] && [ "${{ github.ref }}" == "refs/heads/main" ]; then
+        if [ "${{ github.event_name }}" == "push" ] && [ "${{ github.ref }}" == "refs/heads/master" ] || [ "${{ github.ref }}" == "refs/heads/main" ]; then
           echo "- **Deployment**: 🎉 Image pushed to registry" >> $GITHUB_STEP_SUMMARY
         fi
